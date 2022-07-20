@@ -1,0 +1,73 @@
+# COMPLETE THIS FILE ACCORDING TO THE GIVEN INSTRUCTIONS.
+# USE 'docker-compose' TO START AND STOP YOUR CONTAINERS
+# DO NOT RUN YOUR ACTIONS IF YOU HAVENT COMPLETED THE LAST 'shutdown docker' STEP
+# YOU MAY CHOOSE THE NAMES OF THE STEPS YOURSELF
+
+name: App Tests
+
+# TODO make it so that the actions run on push and pull requests on your main/master branch and the develop branch
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  CI:
+    name: test
+    runs-on: self-hosted
+    steps:
+      
+      # TODO use checkout V2 to checkout your repo
+      # add your statement(s) here
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      # Do not modify this step
+      - name: Clean up running environment
+        run: |
+          clean_up_docker
+
+      # TODO make a step to build and run your docker containers. Please make sure to use the -d flag when you start the containers so the step doesnt hang.
+      # add your statement(s) here
+      - name : Build and run containers
+        run: docker-compose up --build -d
+
+      - name: Sleep for 2 minutes
+        run: sleep 120s
+        shell: bash
+
+      # TODO make a step to run the tests for location microservice (use mvn)
+      # add your statement(s) here
+      - name : Run location tests
+        run: mvn -f ./locationmicroservice test
+        timeout-minutes: 8
+      
+      # TODO make a step to run the tests for tripinfo microservice (use mvn)
+      # add your statement(s) here
+      - name: Run tripinfo tests
+        run: mvn -f ./TripinfoMicroservice test
+        timeout-minutes: 8
+      
+      # TODO make a step to run the tests for user microservice (use mvn)
+      # add your statement(s) here
+      - name: Run user tests
+        run: mvn -f ./UserMicroservice test
+        timeout-minutes: 8
+      
+      # TODO make a step to shut down your docker containers. Please use the --remove-orphans flag.
+      # DO NOT RUN YOUR ACTIONS IF YOU HAVENT COMPLETED THIS STEP
+      # add your statement(s) here
+      - name: stop docker containers
+        run: docker-compose down --remove-orphans
+        timeout-minutes: 8
+
+      # Do not modify this step
+      - name: Clean up running environment on exit
+        run: |
+          clean_up_docker
+        timeout-minutes: 8
